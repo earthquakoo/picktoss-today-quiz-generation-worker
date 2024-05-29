@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "picktoss-today-quiz-generation-worker"
+version = "0.1.0"
+description = ""
+authors = ["Earthquakoo <cream5343@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pymysql = "^1.1.1"
+requests = "^2.32.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
