@@ -2,6 +2,7 @@ import os
 import logging
 import random
 import uuid
+import pytz
 from collections import defaultdict
 from datetime import datetime
 
@@ -73,7 +74,7 @@ def handler(event, context):
         
         quiz_set_id = uuid.uuid4().hex
         quiz_set_insert_query = "INSERT INTO quiz_set (id, solved, is_today_quiz_set, member_id, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s)"
-        timestamp_now = datetime.now()
+        timestamp_now = datetime.now(pytz.timezone('Asia/Seoul'))
         db_manager.execute_query(quiz_set_insert_query, (quiz_set_id, False, True, member['id'], timestamp_now, timestamp_now))
         
         for delivery_quiz in delivery_quizzes:
