@@ -83,13 +83,14 @@ def handler(event, context):
             
             quiz_delivered_count_update_query = f"UPDATE quiz SET delivered_count = delivered_count + 1 WHERE id = {delivery_quiz['id']}"
             db_manager.execute_query(quiz_delivered_count_update_query)
-            
-        content = email_manager.read_and_format_html(
-            replacements={"__QUESTION_LINK__": f"https://www.picktoss.com/random?question_set_id={quiz_set_id}"}
-        )
+        
+        if member['email']:        
+            content = email_manager.read_and_format_html(
+                replacements={"__QUESTION_LINK__": f"https://www.picktoss.com/random?question_set_id={quiz_set_id}"}
+            )
 
-        email_manager.send_email(recipient=member['email'], subject="🚀 오늘의 퀴즈가 도착했습니다!", content=content)
-            
+            email_manager.send_email(recipient=member['email'], subject="🚀 오늘의 퀴즈가 도착했습니다!", content=content)
+                
         db_manager.commit()
 
     return {"statusCode": 200, "message": "hi"}
