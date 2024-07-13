@@ -83,7 +83,8 @@ def handler(event, context):
             db_manager.commit()
         
         timestamp_now = datetime.now(pytz.timezone('Asia/Seoul'))
-        if member['email'] and member['is_quiz_notification_enabled']:      
+        is_quiz_notification_enabled = bool(int.from_bytes(member['is_quiz_notification_enabled'], byteorder='big'))
+        if member['email'] and is_quiz_notification_enabled:      
             content = email_manager.read_and_format_html(
                 replacements={
                     "__TODAY_DATE__": f"{timestamp_now.month}월 {timestamp_now.day}일",
