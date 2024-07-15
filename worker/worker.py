@@ -75,11 +75,13 @@ def handler(event, context):
         for delivery_quiz in delivery_quizzes:
             quiz_set_quiz_inset_query = "INSERT INTO quiz_set_quiz (quiz_id, quiz_set_id, created_at, updated_at) VALUES (%s, %s, %s, %s)"
             db_manager.execute_query(quiz_set_quiz_inset_query, (delivery_quiz['id'], quiz_set_id, timestamp_now, timestamp_now))
-            # db_manager.commit()
+            if member['id'] == 1:
+                db_manager.commit()
             
             quiz_delivered_count_update_query = f"UPDATE quiz SET delivered_count = delivered_count + 1 WHERE id = {delivery_quiz['id']}"
             db_manager.execute_query(quiz_delivered_count_update_query)
-            # db_manager.commit()
+            if member['id'] == 1:
+                db_manager.commit()
         
         # timestamp_now = datetime.now(pytz.timezone('Asia/Seoul'))
         # is_quiz_notification_enabled = bool(int.from_bytes(member['is_quiz_notification_enabled'], byteorder='big'))
@@ -96,6 +98,8 @@ def handler(event, context):
             # email_manager.send_email(recipient=member['email'], subject="🚀 오늘의 퀴즈가 도착했습니다!", content=content)
         member_end_time = time.time()
         print(f"사용자 1명 당 걸린 시간: {member_end_time - member_start_time}")
+        if member['id'] == 1:
+            print(f"member 1이 걸린 시간")
         # db_manager.commit()
     
     end_time = time.time()
