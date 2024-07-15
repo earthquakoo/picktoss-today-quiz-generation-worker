@@ -95,7 +95,7 @@ def handler(event, context):
             
             # email_manager.send_email(recipient=member['email'], subject="🚀 오늘의 퀴즈가 도착했습니다!", content=content)
                 
-        db_manager.commit()
+        # db_manager.commit()
     
     end_time = time.time()
     logging.info(f"병렬처리 총 소요 시간: {end_time - start_time}")
