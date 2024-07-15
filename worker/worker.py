@@ -20,13 +20,13 @@ logging.basicConfig(level=logging.INFO)
 def handler(event, context):
     db_manager = DatabaseManager(host=os.environ["PICKTOSS_DB_HOST"], user=os.environ["PICKTOSS_DB_USER"], password=os.environ["PICKTOSS_DB_PASSWORD"], db=os.environ["PICKTOSS_DB_NAME"])
     email_manager = EmailManager(mailgun_api_key=os.environ["MAILGUN_API_KEY"], mailgun_domain=os.environ["MAILGUN_DOMAIN"])
-    print(event)
     
     members = json.loads(event['Records'][0]['body'])
     
     start_time = time.time()
     
     for member in members.values():
+        member_start_time = time.time()
         subscription_select_query = f"SELECT * FROM subscription WHERE member_id = {member['id']}"
         subscriptions = db_manager.execute_query(subscription_select_query)
         # subscription = subscriptions[0]
@@ -91,13 +91,14 @@ def handler(event, context):
                     }
             )
             
-            logging.info(f"Send email to virtual")
+            print(f"Send email to virtual")
             
             # email_manager.send_email(recipient=member['email'], subject="🚀 오늘의 퀴즈가 도착했습니다!", content=content)
-                
+        member_end_time = time.time()
+        print(f"사용자 1명 당 걸린 시간: {member_end_time - member_start_time}")
         # db_manager.commit()
     
     end_time = time.time()
-    logging.info(f"병렬처리 총 소요 시간: {end_time - start_time}")
+    print(f"병렬처리 총 소요 시간: {end_time - start_time}")
 
     return {"statusCode": 200, "message": "hi"}
