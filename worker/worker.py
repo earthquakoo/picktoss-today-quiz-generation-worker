@@ -27,14 +27,14 @@ def handler(event, context):
     
     for member in members.values():
         member_start_time = time.time()
-        subscription_select_query = f"SELECT * FROM subscription WHERE member_id = {1}"
+        subscription_select_query = f"SELECT * FROM subscription WHERE member_id = {member['id']}"
         subscriptions = db_manager.execute_query(subscription_select_query)
         # subscription = subscriptions[0]
         subscription = {"plan_type": "FREE"}
         candidate_quiz_map: dict[int, list] = defaultdict(list)
         total_quiz_count = 0
         
-        get_all_quizzes_query = f"SELECT DISTINCT q.* FROM quiz q LEFT JOIN options o ON q.id = o.quiz_id JOIN document d on q.document_id = d.id JOIN category c ON d.category_id = c.id WHERE c.member_id = {1}"
+        get_all_quizzes_query = f"SELECT DISTINCT q.* FROM quiz q LEFT JOIN options o ON q.id = o.quiz_id JOIN document d on q.document_id = d.id JOIN category c ON d.category_id = c.id WHERE c.member_id = {member['id']}"
         quizzes: list[dict] = db_manager.execute_query(get_all_quizzes_query)
         for quiz in quizzes:
             if quiz['latest']:
@@ -70,7 +70,7 @@ def handler(event, context):
         quiz_set_id = uuid.uuid4().hex
         quiz_set_insert_query = "INSERT INTO quiz_set (id, solved, is_today_quiz_set, member_id, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s)"
         timestamp_now = datetime.now(pytz.timezone('Asia/Seoul'))
-        db_manager.execute_query(quiz_set_insert_query, (quiz_set_id, False, True, 1, timestamp_now, timestamp_now))
+        db_manager.execute_query(quiz_set_insert_query, (quiz_set_id, False, True, member['id'], timestamp_now, timestamp_now))
         
         for delivery_quiz in delivery_quizzes:
             quiz_set_quiz_inset_query = "INSERT INTO quiz_set_quiz (quiz_id, quiz_set_id, created_at, updated_at) VALUES (%s, %s, %s, %s)"
