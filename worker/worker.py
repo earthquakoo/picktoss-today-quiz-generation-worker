@@ -29,8 +29,8 @@ def handler(event, context):
     for member in members.values():
         subscription_select_query = f"SELECT * FROM subscription WHERE member_id = {member['id']}"
         subscriptions = db_manager.execute_query(subscription_select_query)
-        subscription = subscriptions[0]
-        
+        # subscription = subscriptions[0]
+        subscription = {"plan_type": "FREE"}
         candidate_quiz_map: dict[int, list] = defaultdict(list)
         total_quiz_count = 0
         
