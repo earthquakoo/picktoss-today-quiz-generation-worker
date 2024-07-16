@@ -21,16 +21,13 @@ def handler(event, context):
     db_manager = DatabaseManager(host=os.environ["PICKTOSS_DB_HOST"], user=os.environ["PICKTOSS_DB_USER"], password=os.environ["PICKTOSS_DB_PASSWORD"], db=os.environ["PICKTOSS_DB_NAME"])
     email_manager = EmailManager(mailgun_api_key=os.environ["MAILGUN_API_KEY"], mailgun_domain=os.environ["MAILGUN_DOMAIN"])
     
-    members = json.loads(event['Records'][0]['body'])
-    
-    start_time = time.time()
+    members: dict = json.loads(event['Records'][0]['body'])
     
     for member in members.values():
-        member_start_time = time.time()
         subscription_select_query = f"SELECT * FROM subscription WHERE member_id = {member['id']}"
         subscriptions = db_manager.execute_query(subscription_select_query)
-        # subscription = subscriptions[0]
-        subscription = {"plan_type": "FREE"}
+        subscription = subscriptions[0]
+        # subscription = {"plan_type": "FREE"}
         candidate_quiz_map: dict[int, list] = defaultdict(list)
         total_quiz_count = 0
         
@@ -75,17 +72,15 @@ def handler(event, context):
         for delivery_quiz in delivery_quizzes:
             quiz_set_quiz_inset_query = "INSERT INTO quiz_set_quiz (quiz_id, quiz_set_id, created_at, updated_at) VALUES (%s, %s, %s, %s)"
             db_manager.execute_query(quiz_set_quiz_inset_query, (delivery_quiz['id'], quiz_set_id, timestamp_now, timestamp_now))
-            if member['id'] == 1:
-                db_manager.commit()
+            db_manager.commit()
             
             quiz_delivered_count_update_query = f"UPDATE quiz SET delivered_count = delivered_count + 1 WHERE id = {delivery_quiz['id']}"
             db_manager.execute_query(quiz_delivered_count_update_query)
-            if member['id'] == 1:
-                db_manager.commit()
+            db_manager.commit()
         
-        # timestamp_now = datetime.now(pytz.timezone('Asia/Seoul'))
-        # is_quiz_notification_enabled = bool(int.from_bytes(member['is_quiz_notification_enabled'], byteorder='big'))
-        if member['email']:      
+        timestamp_now = datetime.now(pytz.timezone('Asia/Seoul'))
+        is_quiz_notification_enabled = bool(int.from_bytes(member['is_quiz_notification_enabled'], byteorder='big'))
+        if member['email'] and is_quiz_notification_enabled:      
             content = email_manager.read_and_format_html(
                 replacements={
                     "__TODAY_DATE__": f"{timestamp_now.month}월 {timestamp_now.day}일",
@@ -93,16 +88,9 @@ def handler(event, context):
                     }
             )
             
-            print(f"Send email to virtual")
-            
-            # email_manager.send_email(recipient=member['email'], subject="🚀 오늘의 퀴즈가 도착했습니다!", content=content)
-        member_end_time = time.time()
-        print(f"사용자 1명 당 걸린 시간: {member_end_time - member_start_time}")
-        if member['id'] == 1:
-            print(f"member 1이 걸린 시간")
-        # db_manager.commit()
+            email_manager.send_email(recipient=member['email'], subject="🚀 오늘의 퀴즈가 도착했습니다!", content=content)
+
+        db_manager.commit()
     
-    end_time = time.time()
-    print(f"병렬처리 총 소요 시간: {end_time - start_time}")
 
     return {"statusCode": 200, "message": "hi"}
