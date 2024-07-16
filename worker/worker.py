@@ -79,7 +79,8 @@ def handler(event, context):
             db_manager.commit()
         
         timestamp_now = datetime.now(pytz.timezone('Asia/Seoul'))
-        is_quiz_notification_enabled = bool(int.from_bytes(member['is_quiz_notification_enabled'], byteorder='big'))
+        is_quiz_notification_enabled_binary_value = member['is_quiz_notification_enabled'].encode('utf-8').decode('unicode_escape').encode('latin1')
+        is_quiz_notification_enabled = bool(int.from_bytes(is_quiz_notification_enabled_binary_value, byteorder='big'))
         if member['email'] and is_quiz_notification_enabled:      
             content = email_manager.read_and_format_html(
                 replacements={
